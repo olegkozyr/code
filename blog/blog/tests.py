@@ -5,13 +5,14 @@ from .models import Post
 
 
 # Create your tests here.
-class BlogTEsts(TestCase):
+class BlogTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.title = 'A good title'
         cls.body = 'Nice body content'
         cls.username = 'testuser'
         cls.url = '/post/1/'
+        cls.redirect_code = 302
 
         cls.user = get_user_model().objects.create_user(
             username=cls.username,
@@ -54,3 +55,36 @@ class BlogTEsts(TestCase):
         self.assertEqual(no_response.status_code, 404)
         self.assertContains(response, self.title)
         self.assertTemplateUsed(response, 'post_detail.html')
+
+    def test_post_createview(self):
+        title = 'New title'
+        body = 'New text'
+        response = self.client.post(
+            reverse('post_new'),
+            {
+                'title': title,
+                'body': body,
+                'author': self.user.id,
+            },
+        )
+        self.assertEqual(response.status_code, self.redirect_code)
+        self.assertEqual(Post.objects.last().title, title)
+        self.assertEqual(Post.objects.last().body, body)
+
+    def test_post_updateview(self):
+        title = 'Updated title'
+        body = 'Updated text'
+        response = self.client.post(
+            reverse('post_edit', args='1'),
+            {
+                'title': title,
+                'body': body,
+            },
+        )
+        self.assertEqual(response.status_code, self.redirect_code)
+        self.assertEqual(Post.objects.last().title, title)
+        self.assertEqual(Post.objects.last().body, body)
+
+    def test_post_deleteview(self):
+        response = self.client.post(reverse('post_delete', args='1'))
+        self.assertEqual(response.status_code, self.redirect_code)
