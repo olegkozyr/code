@@ -5,6 +5,7 @@
     <div>
         <h2><a href="{% url 'post_detail' post.pk %}" target="_blank">{{ post.title }}</a></h2>
         <p>{{ post.body }}</p>
+        <h3>id={{ post.pk }}</h3>
     </div>
 {% endfor %}
 {% endblock content %}
